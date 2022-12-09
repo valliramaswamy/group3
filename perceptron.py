@@ -25,7 +25,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import Perceptron
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
-
+import math
 
 
 datapath = "/Users/adil/Documents/INTRO TO AI COURSEWORK/dataset modified/Clean_Dataset_group3(classifier).csv"
@@ -61,16 +61,6 @@ flight = flight[flight.price_outlier != 1]
 print (flight.shape) 
 
 
-# print (flight.shape) 
-
-# log price is target variable Y for now (for now but need to change to another column that has two classifications using median below)
-#print(flight.log_price) 
-# this will give you 50% value which is median = 4.358886 that I used to create another column in dataset (price_classifier)
-#print(flight.log_price.describe())
-
-print(flight)
-print(flight.price_classifier)
-
 # AAKASH bit
 le = LabelEncoder()
 
@@ -84,14 +74,20 @@ flight['class'] = le.fit_transform(flight['class'])
 flight['price_classifier'] = le.fit_transform(flight['price_classifier'])
 
 
-
 # Find unique values within the stops column
 #print(list(set(flight['stops'])))
 
 # Match and replace the numerical values in text with integers
 flight['stops'] = flight['stops'].replace(["zero", "one", "two_or_more"], [0, 1, 2])
 
+# ABOVE WAS PRE PROCESSING
+
+# flight.price_classifier was created using a seperate table with extra column under adil branch 
+# and its value is either "high" or "low" relative to the median of the log price column = 4.358886.
+# Median of log price was retrieved using python code: print(flight.log_price.describe())
+
 print(flight)
+print(flight.price_classifier)
 
 
 # target variable
@@ -110,13 +106,23 @@ print (Y_test.shape)
 # will adjust training parameters 
 percep = Perceptron(max_iter = 500, tol=0.001, eta0=1)
 
-    
 # training perceptron.  
 percep.fit(flight_train,Y_train)
 
 # make predication
 Y_pred = percep.predict(flight_test)
-# prints array
-print(Y_pred)
 # evaluate accuracy
 print('Accuracy: %.2f' % accuracy_score(Y_test, Y_pred))
+print(Y_pred)
+
+# we want to comapre the prediction data with the testing data since testing data is what the 
+# prediction is based on and is the actual data. so convert the column to an array then calculate 
+# rmse
+priceclassifier_testarray = flight_test.price_classifier.to_numpy()
+# printing test data price classifier's array
+print (priceclassifier_testarray)
+
+RMSE = math.sqrt(mean_squared_error(priceclassifier_testarray, Y_pred))
+print("RMSE VALUE:\n")
+print(RMSE)
+
