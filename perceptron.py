@@ -25,11 +25,12 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import Perceptron
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from sklearn.model_selection import KFold
 import math
 
 
 datapath = "/Users/adil/Documents/INTRO TO AI COURSEWORK/dataset modified/Clean_Dataset_group3(classifier).csv"
-# this will read the dataset as a dataframe
+# this will read the dataset as a dataframe i.e. flight is the dataframe 
 flight = pd.read_csv(datapath)
 
 # FAIZA:
@@ -39,8 +40,8 @@ flight.isnull().values.all().sum()
 # VALLI:
 # Feature Engineering: removing outliers & adding new logged price column
 # error with boxplot code
-# flight.boxplot(flight['price'])
-# plt.show()
+plt.boxplot(flight['price'])
+plt.show()
 
 # Creates a new column in the dataframe named 'price outlier'
 flight['price_outlier'] = 0
@@ -61,7 +62,7 @@ flight = flight[flight.price_outlier != 1]
 print (flight.shape) 
 
 
-# AAKASH bit
+# AAKASH:
 le = LabelEncoder()
 
 flight['airline'] = le.fit_transform(flight['airline'])
@@ -114,6 +115,33 @@ Y_pred = percep.predict(flight_test)
 # evaluate accuracy
 print('Accuracy: %.2f' % accuracy_score(Y_test, Y_pred))
 print(Y_pred)
+
+# It started working from here
+result = []
+
+# Should i use price classifier or price for if statement? 
+for x in flight.columns:
+    if x != 'price_classifier':
+        result.append(x)
+
+# Taking 
+X = flight[result].values
+y = flight['price_classifier'].values
+
+
+kf = KFold(5,shuffle=True)
+fold = 1
+# The data is split five ways, for each fold, the 
+# Perceptron is trained, tested and evaluated for accuracy
+for train_index, validate_index in kf.split(X,y):
+    # ERROR BECAUSE OF LINE 128 
+    percep.fit(X[train_index],y[train_index])
+    y_test = y[validate_index]
+    y_pred = percep.predict(X[validate_index])
+
+    print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+    print(f"Fold #{fold}, Training Size: {len(X[train_index])}, Validation Size: {len(X[validate_index])}")
+    fold += 1
 
 # we want to comapre the prediction data with the testing data since testing data is what the 
 # prediction is based on and is the actual data. so convert the column to an array then calculate 
