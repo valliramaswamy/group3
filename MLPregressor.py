@@ -30,20 +30,60 @@ import math
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from sklearn.neural_network import MLPRegressor
+from sklearn import metrics
 
-datapath = "/Users/adil/Documents/INTRO TO AI COURSEWORK/dataset modified/Clean_Dataset_group3(classifier).csv"
+
+
+datapath = "/Users/adil/Documents/INTRO TO AI COURSEWORK/Clean_Dataset.csv"
 # this will read the dataset as a dataframe i.e. flight is the dataframe 
 flight = pd.read_csv(datapath)
 
 # FAIZA:
-flight = flight.sort_values(by='airline', ascending=True)
+#Checking for null values in airline
+flight['airline'].isnull().sum()
+
+#Checking for null values in source city
+flight['source_city'].isnull().sum()
+
+#Checking for null values in departure time
+flight['departure_time'].isnull().sum()
+
+#Checking for null values in stops
+flight['stops'].isnull().sum()
+
+#Checking for null values in arrival_time
+flight['arrival_time'].isnull().sum()
+
+#Checking for null values in destination city
+flight['destination_city'].isnull().sum()
+
+#Checking for null values in class
+flight['class'].isnull().sum()
+
+#Checking for null values in duration
+flight['duration'].isnull().sum()
+
+#Checking for null values in days left
+flight['days_left'].isnull().sum()
+
+#Checking for null values in price
+flight['price'].isnull().sum()
+
+#Checking overall and asking for sum of null values
 flight.isnull().values.all().sum()
+
+# Dropping Flight column. Not in perceptron as not in that column. 
+flight.drop('flight', 1, inplace=True)
+
+# Changing price to Pounds
+flight["price"] = (flight["price"]*0.011).round(2)
 
 # VALLI:
 # Feature Engineering: removing outliers & adding new logged price column
-# error with boxplot code
 plt.boxplot(flight['price'])
 plt.show()
+print(flight.isnull().any())
 
 # Creates a new column in the dataframe named 'price outlier'
 flight['price_outlier'] = 0
@@ -77,14 +117,15 @@ flight['arrival_time'] = le.fit_transform(flight['arrival_time'])
 flight['destination_city'] = le.fit_transform(flight['destination_city'])
 flight['class'] = le.fit_transform(flight['class'])
 
-flight['price_classifier'] = le.fit_transform(flight['price_classifier'])
 
 
 # Find unique values within the stops column
-#print(list(set(flight['stops'])))
+print(list(set(flight['stops'])))
 
 # Match and replace the numerical values in text with integers
 flight['stops'] = flight['stops'].replace(["zero", "one", "two_or_more"], [0, 1, 2])
+
+print (flight.head())
 
 # ABOVE WAS PRE PROCESSING
 
@@ -93,14 +134,14 @@ flight['stops'] = flight['stops'].replace(["zero", "one", "two_or_more"], [0, 1,
 # Median of log price was retrieved using python code: print(flight.log_price.describe())
 
 print(flight)
-print(flight.price_classifier)
+print(flight.price)
 
 
 # target variable
-Y = flight.price_classifier
+Y = flight.price
 print(Y)
 
-# splitting the data. difering random states widly affects the accuracy of the model. can also be None
+# splitting the data. differing random states widly affects the accuracy of the model. can also be None
 flight_train, flight_test, Y_train, Y_test = train_test_split(flight, Y, test_size=0.2, random_state=55)
 
 # row numbers showing a split of 80 to 20 when printed compared to just printing flight.shape
@@ -109,29 +150,27 @@ print (flight_test.shape)
 print (Y_train.shape)
 print (Y_test.shape)
 
-# will adjust training parameters s
-percep = Perceptron(max_iter = 500, tol=0.001, eta0=1)
+# will adjust training parameters. Adam value for solver good for large data sets. Need to configuer number of layers
+MLPpercep = MLPRegressor()
+
 
 # training perceptron.  
-percep.fit(flight_train,Y_train)
+MLPpercep.fit(flight_train,Y_train)
 
-# make predication
-Y_pred = percep.predict(flight_test)
-# evaluate accuracy
-print('Accuracy: %.2f' % accuracy_score(Y_test, Y_pred))
-print(Y_pred)
+# evaluate accuracy. NOT COMPATIBLE WITH REGRESSORS.
+
 
 # It started working from here
 result = []
 
 # Should i use price classifier or price for if statement? 
 for x in flight.columns:
-    if x != 'price_classifier':
+    if x != 'price':
         result.append(x)
 
 # Taking 
 X = flight[result].values
-y = flight['price_classifier'].values
+y = flight['price'].values
 
 
 kf = KFold(5,shuffle=True)
@@ -140,21 +179,18 @@ fold = 1
 # Perceptron is trained, tested and evaluated for accuracy
 for train_index, validate_index in kf.split(X,y):
     # ERROR BECAUSE OF LINE 128 (fixed because of the new X instead of just the dataframe  )
-    percep.fit(X[train_index],y[train_index])
+    MLPpercep.fit(X[train_index],y[train_index])
     y_test = y[validate_index]
-    y_pred = percep.predict(X[validate_index])
+    y_pred = MLPpercep.predict(X[validate_index])
 
     print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
     print(f"Fold #{fold}, Training Size: {len(X[train_index])}, Validation Size: {len(X[validate_index])}")
     fold += 1
 
-# we want to comapre the prediction data with the testing data since testing data is what the 
-# prediction is based on and is the actual data. so convert the column to an array then calculate 
-# rmse. 
-#What is this code should i keep? 
-priceclassifier_testarray = flight_test.price_classifier.to_numpy()
-# printing test data price classifier's array
+
 
 plt.scatter(y_pred[:100], y_test[:100])
 
 sns.regplot(x = y_test, y = y_pred, scatter = False)
+
+plt.show()
