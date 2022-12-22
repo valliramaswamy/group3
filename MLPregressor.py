@@ -63,7 +63,7 @@ flight['class'].isnull().sum()
 
 #Checking for null values in duration
 flight['duration'].isnull().sum()
-
+ 
 #Checking for null values in days left
 flight['days_left'].isnull().sum()
 
@@ -129,6 +129,7 @@ print (flight.head())
 
 # ABOVE WAS PRE PROCESSING
 
+# Commented lines of code right below applies only to classifier version of perceptron.
 # flight.price_classifier was created using a seperate table with extra column under adil branch 
 # and its value is either "high" or "low" relative to the median of the log price column = 4.358886.
 # Median of log price was retrieved using python code: print(flight.log_price.describe())
@@ -154,21 +155,21 @@ print (Y_test.shape)
 MLPpercep = MLPRegressor()
 
 
-# training perceptron.  
-MLPpercep.fit(flight_train,Y_train)
 
-# evaluate accuracy. NOT COMPATIBLE WITH REGRESSORS.
+# training perceptron.  
+# MLPpercep.fit(flight_train,Y_train)
+# evaluate accuracy. Only compatabile with classifer version of perceptron.
 
 
 # It started working from here
 result = []
 
-# Should i use price classifier or price for if statement? 
+
 for x in flight.columns:
     if x != 'price':
         result.append(x)
 
-# Taking 
+
 X = flight[result].values
 y = flight['price'].values
 
@@ -189,8 +190,10 @@ for train_index, validate_index in kf.split(X,y):
 
 
 
-plt.scatter(y_pred[:100], y_test[:100])
-
+plt.scatter(y_pred[:2000], y_test[:2000])
+plt.title('MLP Model')
+plt.xlabel('Actual')
+plt.ylabel('Predicted')
 sns.regplot(x = y_test, y = y_pred, scatter = False)
 
 plt.show()
