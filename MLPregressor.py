@@ -129,7 +129,7 @@ print (flight.head())
 
 # ABOVE WAS PRE PROCESSING
 
-# Commented lines of code right below applies only to classifier version of perceptron.
+# Commented lines right below applies only to classifier version of perceptron.
 # flight.price_classifier was created using a seperate table with extra column under adil branch 
 # and its value is either "high" or "low" relative to the median of the log price column = 4.358886.
 # Median of log price was retrieved using python code: print(flight.log_price.describe())
@@ -137,31 +137,17 @@ print (flight.head())
 print(flight)
 print(flight.price)
 
-
 # target variable
 Y = flight.price
 print(Y)
 
 # splitting the data. differing random states widly affects the accuracy of the model. can also be None
+# below code irrelevant as using k fold now.
 flight_train, flight_test, Y_train, Y_test = train_test_split(flight, Y, test_size=0.2, random_state=55)
+  
+# MLPpercep.fit(flight_train,Y_train). We are using k fold instead
+# evaluate accuracy (Only compatabile with classifer version of perceptron)
 
-# row numbers showing a split of 80 to 20 when printed compared to just printing flight.shape
-print (flight_train.shape)
-print (flight_test.shape)
-print (Y_train.shape)
-print (Y_test.shape)
-
-# will adjust training parameters. Adam value for solver good for large data sets. Need to configuer number of layers
-MLPpercep = MLPRegressor()
-
-
-
-# training perceptron.  
-# MLPpercep.fit(flight_train,Y_train)
-# evaluate accuracy. Only compatabile with classifer version of perceptron.
-
-
-# It started working from here
 result = []
 
 
@@ -173,13 +159,93 @@ for x in flight.columns:
 X = flight[result].values
 y = flight['price'].values
 
+MLPpercep = MLPRegressor(hidden_layer_sizes=(100))
 
 kf = KFold(5,shuffle=True)
 fold = 1
-# The data is split five ways, for each fold, the 
-# Perceptron is trained, tested and evaluated for accuracy
 for train_index, validate_index in kf.split(X,y):
-    # ERROR BECAUSE OF LINE 128 (fixed because of the new X instead of just the dataframe  )
+    MLPpercep.fit(X[train_index],y[train_index])
+    y_test = y[validate_index]
+    y_pred = MLPpercep.predict(X[validate_index])
+
+    print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+    print(f"Fold #{fold}, Training Size: {len(X[train_index])}, Validation Size: {len(X[validate_index])}")
+    fold += 1
+    
+    
+MLPpercep = MLPRegressor(hidden_layer_sizes=(150))
+
+kf = KFold(5,shuffle=True)
+fold = 1
+for train_index, validate_index in kf.split(X,y):
+    MLPpercep.fit(X[train_index],y[train_index])
+    y_test = y[validate_index]
+    y_pred = MLPpercep.predict(X[validate_index])
+
+    print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+    print(f"Fold #{fold}, Training Size: {len(X[train_index])}, Validation Size: {len(X[validate_index])}")
+    fold += 1
+    
+MLPpercep = MLPRegressor(hidden_layer_sizes=(250))
+
+kf = KFold(5,shuffle=True)
+fold = 1
+for train_index, validate_index in kf.split(X,y):
+    MLPpercep.fit(X[train_index],y[train_index])
+    y_test = y[validate_index]
+    y_pred = MLPpercep.predict(X[validate_index])
+
+    print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+    print(f"Fold #{fold}, Training Size: {len(X[train_index])}, Validation Size: {len(X[validate_index])}")
+    fold += 1
+    
+MLPpercep = MLPRegressor(hidden_layer_sizes=(400))
+
+kf = KFold(5,shuffle=True)
+fold = 1
+for train_index, validate_index in kf.split(X,y):
+    MLPpercep.fit(X[train_index],y[train_index])
+    y_test = y[validate_index]
+    y_pred = MLPpercep.predict(X[validate_index])
+
+    print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+    print(f"Fold #{fold}, Training Size: {len(X[train_index])}, Validation Size: {len(X[validate_index])}")
+    fold += 1
+    
+    
+MLPpercep = MLPRegressor(hidden_layer_sizes=(750))
+
+kf = KFold(5,shuffle=True)
+fold = 1
+for train_index, validate_index in kf.split(X,y):
+    MLPpercep.fit(X[train_index],y[train_index])
+    y_test = y[validate_index]
+    y_pred = MLPpercep.predict(X[validate_index])
+
+    print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+    print(f"Fold #{fold}, Training Size: {len(X[train_index])}, Validation Size: {len(X[validate_index])}")
+    fold += 1
+
+    
+MLPpercep = MLPRegressor(hidden_layer_sizes=(150, 100))
+
+kf = KFold(5,shuffle=True)
+fold = 1
+for train_index, validate_index in kf.split(X,y):
+    MLPpercep.fit(X[train_index],y[train_index])
+    y_test = y[validate_index]
+    y_pred = MLPpercep.predict(X[validate_index])
+
+    print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+    print(f"Fold #{fold}, Training Size: {len(X[train_index])}, Validation Size: {len(X[validate_index])}")
+    fold += 1
+    
+    
+MLPpercep = MLPRegressor(hidden_layer_sizes=(150, 100, 50))
+
+kf = KFold(5,shuffle=True)
+fold = 1
+for train_index, validate_index in kf.split(X,y):
     MLPpercep.fit(X[train_index],y[train_index])
     y_test = y[validate_index]
     y_pred = MLPpercep.predict(X[validate_index])
